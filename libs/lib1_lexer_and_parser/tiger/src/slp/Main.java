@@ -18,9 +18,14 @@ import control.Control;
 public class Main
 {
     // ///////////////////////////////////////////
-	//Exercise 3: get maximum number of arguments of any print statement.
+	//Lab1. Exercise 3: get maximum number of arguments of any print statement.
 	//Function maxArgsExplist() and maxArgsExp() are called by maxArgsStm() 
 	//maxArgsStm(Stm.T stm) return the maximum number of arguments
+	
+	private int maxArgs(Stm.T stm)
+	{
+		return maxArgsStm(stm);
+	}
 	
 	private int maxArgsExplist(ExpList.T explist)
     {
@@ -104,7 +109,8 @@ public class Main
         }
         return 0;
     }
-
+    //Lab1. Exercise 3 : end
+    
     // ////////////////////////////////////////
     // interpreter
 
