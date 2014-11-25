@@ -14,6 +14,7 @@ import slp.Slp.Stm;
 import util.Bug;
 import util.Todo;
 import control.Control;
+import slp.Slp.Exp.OP_T;
 
 public class Main
 {
@@ -109,27 +110,189 @@ public class Main
         }
         return 0;
     }
-    //Lab1. Exercise 3 : end
+    // Lab1. Exercise 3 : end
     
     // ////////////////////////////////////////
-    // interpreter
-
-    private void interpExp(Exp.T exp)
+    // Lab1. Exercise 4 : interprets program in language SLP
+    
+    private void interp(Stm.T s)
     {
-        new Todo();
+    	interpStm(s, null);
+    }
+   
+    private Table interpStm(Stm.T stm, Table t)
+    {
+    	IntAndTable intAndTable;
+
+		if (stm instanceof Stm.Compound)
+		{
+			Stm.Compound s = (Stm.Compound)stm;
+			
+			t = interpStm(s.s1, t);
+			return interpStm(s.s2, t);
+		} 
+		else if (stm instanceof Stm.Assign)
+		{
+			Stm.Assign s = (Stm.Assign)stm;
+			
+			intAndTable = interpExp(s.exp, t);
+			return update(intAndTable.table, s.id, intAndTable.value);
+		}
+		else if (stm instanceof Stm.Print)
+		{
+			Stm.Print s = (Stm.Print)stm;
+			
+			intAndTable = interpExplist(s.explist, t);
+			return intAndTable.table;
+		}
+		else
+		{
+			new Bug();
+		}
+		
+		return null;
+    }
+    
+    private IntAndTable interpExplist(ExpList.T explist, Table t)
+    {
+    	IntAndTable intAndTable;
+    	
+    	if(explist instanceof ExpList.Pair)
+    	{
+    		ExpList.Pair p = (ExpList.Pair)explist;
+
+    		intAndTable = interpExp(p.exp, t);
+    		System.out.print(intAndTable.value + " ");
+    		
+    		return interpExplist(p.list, t);
+    	}
+    	else if(explist instanceof ExpList.Last)
+    	{
+    		ExpList.Last l = (ExpList.Last)explist;
+
+    		intAndTable = interpExp(l.exp, t);
+    		System.out.print(intAndTable.value + "\n");
+    		
+    		return intAndTable;
+    	}
+    	else
+    	{
+    		new Bug();
+    	}
+    	
+    	return null;
     }
 
-    private void interpStm(Stm.T prog)
+    
+    private IntAndTable interpExp(Exp.T exp, Table t)
     {
-        if (prog instanceof Stm.Compound) {
-            new Todo();
-        } else if (prog instanceof Stm.Assign) {
-            new Todo();
-        } else if (prog instanceof Stm.Print) {
-            new Todo();
-        } else
-            new Bug();
+    	int value = 0;
+    	
+        if (exp instanceof Exp.Id)
+        {
+        	Exp.Id e = (Exp.Id)exp;
+        	value = lookup(t, e.id);
+        	
+        	return new IntAndTable(value, t);
+        }
+        else if (exp instanceof Exp.Num)
+        {
+        	Exp.Num e = (Exp.Num)exp;
+        	
+        	return new IntAndTable(e.num, t);
+        }
+        else if (exp instanceof Exp.Eseq)
+        {
+        	Exp.Eseq eseq = (Exp.Eseq)exp;
+        	t = interpStm(eseq.stm, t);
+        	
+        	return interpExp(eseq.exp, t);
+        }
+        else if (exp instanceof Exp.Op)
+        {
+        	IntAndTable intAndTableLeft;
+         	IntAndTable intAndTableRight;
+        	
+        	Exp.Op op = (Exp.Op)exp;
+        	intAndTableLeft = interpExp(op.left, t);
+			intAndTableRight = interpExp(op.right, intAndTableLeft.table);
+			
+			switch (op.op)
+			{
+				case ADD:
+					value = intAndTableLeft.value + intAndTableRight.value;
+					break;
+				case SUB:
+					value = intAndTableLeft.value - intAndTableRight.value;
+					break;
+				case TIMES:
+					value = intAndTableLeft.value * intAndTableRight.value;
+					break;
+				case DIVIDE:
+					value = intAndTableLeft.value / intAndTableRight.value;
+					break;
+				default:
+					new Bug();
+					break;
+			}
+			return new IntAndTable(value, intAndTableRight.table);
+		}
+        else
+        {
+        	new Bug();
+        }
+        
+        return null;
+    }  
+    
+    public class Table
+    {
+    	String id;
+    	int value;
+    	Table tail;
+    	
+    	public Table(String i, int v, Table t)
+    	{
+    		id = i;
+    		value = v;
+    		tail = t;
+    	}
+    	
     }
+    
+    public class IntAndTable
+    {
+    	int value;
+    	Table table;
+    	
+    	public IntAndTable(int ii, Table tt)
+    	{
+    		value = ii;
+    		table = tt;
+    	}
+    }
+    
+    private int lookup(Table table, String id)
+    {
+    	Table t = table;
+    	
+    	while(t != null)
+    	{
+    		if(t.id == id)
+    			return t.value;
+    		t = t.tail;
+    	}
+    	
+    	new Bug();
+    	return -1;
+    }
+    
+    private Table update(Table table, String id, int value) 
+    {
+		return new Table(id, value, table);
+	}
+    
+    // Lab1. Exercise 4 : end
 
     // ////////////////////////////////////////
     // compile
@@ -272,7 +435,7 @@ public class Main
 
         // interpret a given program
         if (Control.ConSlp.action == Control.ConSlp.T.INTERP) {
-            interpStm(prog);
+            interp(prog);
         }
 
         // compile a given SLP program to x86
