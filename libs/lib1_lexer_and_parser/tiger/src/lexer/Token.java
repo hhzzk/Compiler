@@ -58,8 +58,9 @@ public class Token
         TOKEN_WHILE, // "while"
     }
 
-    public static HashMap<String,Kind> token_string = new HashMap<String, Kind>(){
-  	  {
+    public static HashMap<String, Kind> token_string = new HashMap<String, Kind>()
+    {
+    	{
   			put("boolean", Kind.TOKEN_BOOLEAN);
   			put("class", Kind.TOKEN_CLASS);
   			put("else", Kind.TOKEN_ELSE);

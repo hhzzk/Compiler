@@ -1,6 +1,5 @@
 package slp;
 
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.util.HashSet;
 
@@ -12,9 +11,8 @@ import slp.Slp.Exp.Op;
 import slp.Slp.ExpList;
 import slp.Slp.Stm;
 import util.Bug;
-import util.Todo;
 import control.Control;
-import slp.Slp.Exp.OP_T;
+
 
 public class Main
 {
@@ -349,6 +347,12 @@ public class Main
                     compileExp(left);
                     emit("\tpushl\t%eax\n");
                     compileExp(right);
+                    //Exercise 5 : Check last movl number is $0
+                    if((buf.lastIndexOf("0")) == buf.lastIndexOf("$")+1)
+                    {
+                    	System.out.println("Divied by zero!!\n");
+                    	System.exit(1);
+                    }
                     emit("\tpopl\t%edx\n");
                     emit("\tmovl\t%eax, %ecx\n");
                     emit("\tmovl\t%edx, %eax\n");
@@ -429,7 +433,7 @@ public class Main
     {
         // return the maximum number of arguments
         if (Control.ConSlp.action == Control.ConSlp.T.ARGS) {
-            int numArgs = maxArgsStm(prog);
+            int numArgs = maxArgs(prog);
             System.out.println(numArgs);
         }
 
@@ -474,7 +478,7 @@ public class Main
                 e.printStackTrace();
                 System.exit(0);
             }
-            // System.out.println(buf.toString());
+             System.out.println(buf.toString());
         }
     }
 }
